@@ -5,11 +5,13 @@
       placeholder="Type a message and hit enter to send..."
       @keypress.enter.prevent="handleSubmit"
     />
+    <div class="error">{{ error }}</div>
   </form>
 </template>
 
 <script lang="ts">
 import getUser from '@/composables/getUser'
+import useCollection from '@/composables/useCollection'
 import { timestamp } from '@/firebase/config'
 import { defineComponent, ref } from 'vue'
 
@@ -18,19 +20,22 @@ export default defineComponent({
   setup() {
     const message = ref('')
     const { user } = getUser()
+    const { addDoc, error } = useCollection('messages')
 
     const handleSubmit = async () => {
       const chat = {
-        name: user.value?.displayName,
+        name: user.value?.displayName || '',
         message: message.value,
         createdAt: timestamp()
       }
-      console.log(chat)
-      message.value = ''
+      await addDoc(chat)
+      if (!error.value) {
+        message.value = ''
+      }
     }
 
 
-    return { message, handleSubmit }
+    return { message, handleSubmit, error }
   },
 })
 </script>
