@@ -1,5 +1,5 @@
 import { projectFirestore } from '@/firebase/config'
-import { Ref, ref } from 'vue'
+import { Ref, ref, watchEffect } from 'vue'
 
 const getCollection = (collection: string) => {
   const documents: Ref<any[]|null> = ref(null)
@@ -8,7 +8,8 @@ const getCollection = (collection: string) => {
   const collectionRef = projectFirestore.collection(collection)
     .orderBy('createdAt')
 
-  collectionRef.onSnapshot(snap => {
+  const unsub = collectionRef.onSnapshot(snap => {
+    console.log('snapshot')
     documents.value = snap.docs
       .map(doc => ({
         ...doc.data(),
@@ -20,6 +21,11 @@ const getCollection = (collection: string) => {
     console.log(err.message)
     documents.value = null
     error.value = 'could not fetch data'
+  })
+
+  watchEffect(onInvalidate => {
+    // unsub from prev collection when watcher is stopped (component unmounted)
+    onInvalidate(() => unsub())
   })
 
   return { error, documents }
