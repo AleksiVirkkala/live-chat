@@ -1,7 +1,7 @@
 <template>
   <div class="chat-window">
     <div v-if="error">{{ error }}</div>
-    <div v-if="formattedDocuments" class="messages">
+    <div v-if="formattedDocuments" ref="messages" class="messages">
       <div v-for="doc in formattedDocuments" :key="doc.id" class="single">
         <span class="created-at">{{ doc.createdAt }}</span>
         <span class="name">{{ doc.name }}</span>
@@ -12,7 +12,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue'
+import type { Ref } from 'vue'
+import { ref, computed, defineComponent, onUpdated } from 'vue'
 import getCollection from '@/composables/getCollection'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -25,7 +26,14 @@ export default defineComponent({
       ...doc, createdAt: formatDistanceToNow(doc.createdAt.toDate())
     })) : null)
 
-    return { error, documents, formattedDocuments }
+    // Auto-scroll to bottom of messages
+    const messages: Ref<any> = ref(null)
+
+    onUpdated(() => {
+      messages.value.scrollTop = messages.value.scrollHeight
+    })
+
+    return { error, documents, formattedDocuments, messages }
   },
 })
 </script>
