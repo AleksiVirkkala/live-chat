@@ -1,9 +1,9 @@
 <template>
   <div class="chat-window">
     <div v-if="error">{{ error }}</div>
-    <div v-if="documents" class="messages">
-      <div v-for="doc in documents" :key="doc.id" class="single">
-        <span class="created-at">{{ doc.createdAt.toDate() }}</span>
+    <div v-if="formattedDocuments" class="messages">
+      <div v-for="doc in formattedDocuments" :key="doc.id" class="single">
+        <span class="created-at">{{ doc.createdAt }}</span>
         <span class="name">{{ doc.name }}</span>
         <span class="message">{{ doc.message }}</span>
       </div>
@@ -12,15 +12,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent } from 'vue'
 import getCollection from '@/composables/getCollection'
+import { formatDistanceToNow } from 'date-fns'
 
 export default defineComponent({
   name: 'ChatWindow',
   setup() {
     const { error, documents } = getCollection('messages')
 
-    return { error, documents }
+    const formattedDocuments = computed(() => documents.value ? documents.value.map(doc => ({
+      ...doc, createdAt: formatDistanceToNow(doc.createdAt.toDate())
+    })) : null)
+
+    return { error, documents, formattedDocuments }
   },
 })
 </script>
