@@ -1,6 +1,16 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, RouteRecordRaw, NavigationGuard } from 'vue-router'
 import Welcome from '@/views/Welcome.vue'
 import Chatroom from '@/views/Chatroom.vue'
+import { projectAuth } from '@/firebase/config'
+
+// auth guard
+const requireAuth: NavigationGuard = (to, from, next) => {
+  const user = projectAuth.currentUser
+  if (!user) {
+    next({ name: 'Welcome' })
+  }
+  next()
+}
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -11,7 +21,8 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/chatroom',
     name: 'Chatroom',
-    component: Chatroom
+    component: Chatroom,
+    beforeEnter: requireAuth
   }
 ]
 
