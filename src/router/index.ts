@@ -12,11 +12,20 @@ const requireAuth: NavigationGuard = (to, from, next) => {
   next()
 }
 
+const requireNoAuth: NavigationGuard = (to, from, next) => {
+  const user = projectAuth.currentUser
+  if (user) {
+    next({ name: 'Chatroom' })
+  }
+  next()
+}
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Welcome',
     component: Welcome,
+    beforeEnter: requireNoAuth
   },
   {
     path: '/chatroom',
