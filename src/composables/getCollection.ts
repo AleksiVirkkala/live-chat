@@ -9,7 +9,6 @@ const getCollection = (collection: string) => {
     .orderBy('createdAt')
 
   const unsub = collectionRef.onSnapshot(snap => {
-    console.log('snapshot')
     documents.value = snap.docs
       .map(doc => ({
         ...doc.data(),
